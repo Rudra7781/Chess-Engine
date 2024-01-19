@@ -1251,6 +1251,12 @@ void print_move(int move){
 // print move list
 void print_move_list(moves *move_list){
 
+
+    // skip on empty list
+    if(!move_list->count){
+        printf("\nNo Moves in the move_list\n");
+        return;
+    }
     printf("\n      move  piece, capture, double, enpassant, castling\n\n");
 
     // loop over move list
@@ -1262,7 +1268,7 @@ void print_move_list(moves *move_list){
             // print move
             printf("    %s%s%c   %c       %d         %d         %d         %d\n", square_to_coordinates[get_move_source(move)],
                                                                                   square_to_coordinates[get_move_target(move)],
-                                                                                  promoted_pieces[get_move_promoted(move)],
+                                                                                  get_move_promoted(move) ? promoted_pieces[get_move_promoted(move)] : ' ',
                                                                                   ascii_pieces[get_move_piece(move)],
                                                                                   get_move_capture(move) ? 1 : 0,
                                                                                   get_move_double(move) ? 1 : 0,
@@ -1272,7 +1278,7 @@ void print_move_list(moves *move_list){
             // print move
             printf("      %s%s%c   %s       %d         %d         %d         %d\n", square_to_coordinates[get_move_source(move)],
                                                                                   square_to_coordinates[get_move_target(move)],
-                                                                                  promoted_pieces[get_move_promoted(move)],
+                                                                                  get_move_promoted(move) ? promoted_pieces[get_move_promoted(move)] : ' ',
                                                                                   unicode_pieces[get_move_piece(move)],
                                                                                   get_move_capture(move) ? 1 : 0,
                                                                                   get_move_double(move) ? 1 : 0,
@@ -1288,8 +1294,12 @@ void print_move_list(moves *move_list){
 }
 
 // generate all moves
-static inline void generate_moves(){
+static inline void generate_moves(moves  *move_list){
     
+
+    // init move count
+    move_list->count = 0;
+
     // init soure and target : sourse is very peace is standing, target is very peace will be moving
     int  source_square, target_square;
 
@@ -1326,19 +1336,18 @@ static inline void generate_moves(){
                         // promotion
                         if (source_square >= a7 && source_square <= h7)
                         {
-                            printf("promotion: %s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_square]);
-                            /* code */
+                            add_move(move_list,encode_move(source_square, target_square, piece, Q, 0, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, R, 0, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, B, 0, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, N, 0, 0, 0, 0));
                         }else{
-
-                            // one square ahead
-                            
-                            printf("single: %s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_square]);
+                            // one square ahead]
+                            add_move(move_list,encode_move(source_square, target_square, piece, 0, 0, 0, 0, 0));
 
                             // two square ahead
                             if ((source_square >= a2 && source_square <= h2) && !get_bit(occupancies[both], target_square - 8))
                             {
-                                target_square -= 8;
-                                printf("double :%s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_square]);
+                                add_move(move_list,encode_move(source_square, (target_square - 8), piece, 0, 0, 1, 0, 0));
                             }
                             
                         }
@@ -1357,12 +1366,14 @@ static inline void generate_moves(){
                         // capture promotion
                         if (source_square >= a7 && source_square <= h7)
                         {
-                            printf("Capture promotion: %s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_square]);
+                            add_move(move_list,encode_move(source_square, target_square, piece, Q, 1, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, R, 1, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, B, 1, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, N, 1, 0, 0, 0));
 
                         }else{
                             // normal capture
-                            printf("Capture : %s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_square]);
-                            
+                            add_move(move_list,encode_move(source_square, target_square, piece, 0, 1, 0, 0, 0));
                         }
 
 
@@ -1378,7 +1389,9 @@ static inline void generate_moves(){
                         if (enpassant_attacks)
                         {
                             int target_enpassant = get_ls1b_index(enpassant_attacks);
-                            printf("enP Capture : %s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_enpassant]);
+                            add_move(move_list,encode_move(source_square, target_square, piece, 0, 1, 0, target_enpassant, 0));
+
+                            
                         }
                         
 
@@ -1766,17 +1779,12 @@ int main(){
     init_all();
 
     // parse_fen("8/8/8/3B4/8/8/8/8/ b - - ");
-    parse_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1  ");
+    parse_fen("r3k2r/pPppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq c6 0 1  ");
     print_board();
     
-
-    int move =  encode_move(e2, e1, p, 0, 1, 1, 0, 0);
-
-    //  extract target square
     moves move_list[2];
-    move_list->count =  0;
-    add_move(move_list,move);
-    add_move(move_list,encode_move(d5, g2, B, 0, 1, 0, 0, 0));
+
+    generate_moves(move_list);
 
     print_move_list(move_list);
 
