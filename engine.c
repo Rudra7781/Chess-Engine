@@ -1389,12 +1389,9 @@ static inline void generate_moves(moves  *move_list){
                         if (enpassant_attacks)
                         {
                             int target_enpassant = get_ls1b_index(enpassant_attacks);
-                            add_move(move_list,encode_move(source_square, target_square, piece, 0, 1, 0, target_enpassant, 0));
-
-                            
+                            add_move(move_list,encode_move(source_square, target_enpassant, piece, 0, 1, 0, 1, 0));
                         }
                         
-
                     }
 
                     // pop ls1b from bitboard
@@ -1413,7 +1410,8 @@ static inline void generate_moves(moves  *move_list){
                     if (!get_bit(occupancies[both],f1) && !get_bit(occupancies[both],g1))
                     {
                         // make sure king and f1 square are not under attack
-                        if (!is_sqaured_attacked(e1,black) && !is_sqaured_attacked(f1,black )) printf("casteling move : %s -> %s \n",square_to_coordinates[e1],square_to_coordinates[g1]);
+                        if (!is_sqaured_attacked(e1,black) && !is_sqaured_attacked(f1,black )) add_move(move_list,encode_move(e1, g1, piece, 0, 0, 0, 0, 1));
+
                         
                         
                     }
@@ -1427,7 +1425,7 @@ static inline void generate_moves(moves  *move_list){
                     if (!get_bit(occupancies[both],b1) && !get_bit(occupancies[both],c1) && !get_bit(occupancies[both],d1))
                     {
                         // make sure king, c1 and d1 square are not under attack
-                        if (!is_sqaured_attacked(e1,black) && !is_sqaured_attacked(d1,black ))printf("casteling move : %s -> %s \n",square_to_coordinates[e1],square_to_coordinates[c1]);
+                        if (!is_sqaured_attacked(e1,black) && !is_sqaured_attacked(d1,black )) add_move(move_list,encode_move(e1, c1, piece, 0, 0, 0, 0, 1));
      
                         
                     }
@@ -1458,17 +1456,21 @@ static inline void generate_moves(moves  *move_list){
                         // promotion
                         if (source_square >= a2 && source_square <= h2)
                         {
-                            printf("promotion : %s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_square]);
+                             add_move(move_list,encode_move(source_square, target_square, piece, q, 0, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, r, 0, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, b, 0, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, n, 0, 0, 0, 0));
                         }else{
 
                             // one square ahead
-                            printf("single : %s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_square]);
+                            add_move(move_list,encode_move(source_square, target_square, piece, 0, 0, 0, 0, 0));
 
                             // two square ahead
                             if ((source_square >= a7 && source_square <= h7) && !get_bit(occupancies[both], target_square + 8))
                             {
-                                target_square += 8;
-                                printf("double : %s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_square]);
+                                // target_square += 8;
+                                add_move(move_list,encode_move(source_square, (target_square + 8), piece, 0, 0, 1, 0, 0));
+;
                             }
                             
                         }
@@ -1487,12 +1489,14 @@ static inline void generate_moves(moves  *move_list){
                         // capture promotion
                         if (source_square >= a2 && source_square <= h2)
                         {
-                            printf("Capture promotion: %s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_square]);
-
+                            // promotion  capture
+                            add_move(move_list,encode_move(source_square, target_square, piece, q, 1, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, r, 1, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, b, 1, 0, 0, 0));
+                            add_move(move_list,encode_move(source_square, target_square, piece, n, 1, 0, 0, 0));
                         }else{
                             // normal capture
-                            printf("Capture : %s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_square]);
-                            
+                            add_move(move_list,encode_move(source_square, target_square, piece, 0, 1, 0, 0, 0));
                         }
 
 
@@ -1508,7 +1512,7 @@ static inline void generate_moves(moves  *move_list){
                         if (enpassant_attacks)
                         {
                             int target_enpassant = get_ls1b_index(enpassant_attacks);
-                            printf("enP Capture : %s -> %s \n", square_to_coordinates[source_square], square_to_coordinates[target_enpassant]);
+                            add_move(move_list,encode_move(source_square, target_enpassant, piece, 0, 0, 0, 1, 0));
                         }
                         
 
@@ -1528,9 +1532,11 @@ static inline void generate_moves(moves  *move_list){
                     if (!get_bit(occupancies[both],f8) && !get_bit(occupancies[both],g8))
                     {
                         // make sure king and f8 square are not under attack
-                        if (!is_sqaured_attacked(e8,white) && !is_sqaured_attacked(f8,white )) printf("casteling move : %s -> %s \n",square_to_coordinates[e8],square_to_coordinates[g8]);
-                        
-                        
+                        if (!is_sqaured_attacked(e8,white) && !is_sqaured_attacked(f8,white )) 
+                        {
+                            add_move(move_list,encode_move(e8, g8, piece, 0, 0, 0, 0, 1));
+                        }
+
                     }
                     
                 }
@@ -1542,15 +1548,14 @@ static inline void generate_moves(moves  *move_list){
                     if (!get_bit(occupancies[both],b8) && !get_bit(occupancies[both],c8) && !get_bit(occupancies[both],d8))
                     {
                         // make sure king, c8 and d8 square are not under attack
-                        if (!is_sqaured_attacked(e8,white) && !is_sqaured_attacked(d8,white ))printf("casteling move : %s -> %s \n",square_to_coordinates[e8],square_to_coordinates[c8]);
-     
+                        if (!is_sqaured_attacked(e8,white) && !is_sqaured_attacked(d8,white ))
+                        {
+                            add_move(move_list,encode_move(e8, c8, piece, 0, 0, 0, 0, 1));
+                        }
                 
                     }
                 }
-                
-
             }
-        
         }
 
         // generate knight moves
@@ -1779,7 +1784,7 @@ int main(){
     init_all();
 
     // parse_fen("8/8/8/3B4/8/8/8/8/ b - - ");
-    parse_fen("r3k2r/pPppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq c6 0 1  ");
+    parse_fen("r3k2r/pPppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPpP/R3K2R b KQkq a3 0 1  ");
     print_board();
     
     moves move_list[2];
