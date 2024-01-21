@@ -1578,11 +1578,13 @@ static inline void generate_moves(moves  *move_list){
 
                     //quite 
                     if(!get_bit((side == white) ? occupancies[black] : occupancies[white], target_square)){
+                        
+                        add_move(move_list,encode_move(source_square, target_square, piece, 0, 0, 0, 0, 0));
+                        
+                    }else{ // capture
 
-                        printf("knight moves  to - %s \n",square_to_coordinates[target_square]);
-                    }else{
+                        add_move(move_list,encode_move(source_square, target_square, piece, 0, 1, 0, 0, 0));
 
-                        printf("knight capture on - %s \n",square_to_coordinates[target_square]);
                     }
 
                     // capture 
@@ -1620,10 +1622,13 @@ static inline void generate_moves(moves  *move_list){
                     //quite 
                     if(!get_bit((side == white) ? occupancies[black] : occupancies[white], target_square)){
 
-                        printf("bishop moves  to - %s \n",square_to_coordinates[target_square]);
-                    }else{
+                        add_move(move_list,encode_move(source_square, target_square, piece, 0, 0, 0, 0, 0));
 
-                        printf("bishop capture on - %s \n",square_to_coordinates[target_square]);
+
+                    }else{ // capture
+
+                        add_move(move_list,encode_move(source_square, target_square, piece, 0, 1, 0, 0, 0));
+
                     }
 
                     // capture 
@@ -1660,10 +1665,11 @@ static inline void generate_moves(moves  *move_list){
                     //quite 
                     if(!get_bit((side == white) ? occupancies[black] : occupancies[white], target_square)){
 
-                        printf("rook moves  to - %s \n",square_to_coordinates[target_square]);
+                        add_move(move_list,encode_move(source_square, target_square, piece, 0, 0, 0, 0, 0));
+
                     }else{
 
-                        printf("rook capture on - %s \n",square_to_coordinates[target_square]);
+                        add_move(move_list,encode_move(source_square, target_square, piece, 0, 1, 0, 0, 0));
                     }
 
                     // capture 
@@ -1701,10 +1707,12 @@ static inline void generate_moves(moves  *move_list){
                     //quite 
                     if(!get_bit((side == white) ? occupancies[black] : occupancies[white], target_square)){
 
-                        printf("queen moves  to - %s \n",square_to_coordinates[target_square]);
+                        add_move(move_list,encode_move(source_square, target_square, piece, 0, 0, 0, 0, 0));
+
                     }else{
 
-                        printf("queen capture on - %s \n",square_to_coordinates[target_square]);
+                        add_move(move_list,encode_move(source_square, target_square, piece, 0, 1, 0, 0, 0));
+
                     }
 
                     // capture 
@@ -1741,10 +1749,12 @@ static inline void generate_moves(moves  *move_list){
                     //quite 
                     if(!get_bit((side == white) ? occupancies[black] : occupancies[white], target_square)){
 
-                        printf("king moves  to - %s \n",square_to_coordinates[target_square]);
+                        add_move(move_list,encode_move(source_square, target_square, piece, 0, 0, 0, 0, 0));
+
                     }else{
 
-                        printf("king capture on - %s \n",square_to_coordinates[target_square]);
+                        add_move(move_list,encode_move(source_square, target_square, piece, 0, 1, 0, 0, 0));
+
                     }
 
                     // capture 
@@ -1784,7 +1794,7 @@ int main(){
     init_all();
 
     // parse_fen("8/8/8/3B4/8/8/8/8/ b - - ");
-    parse_fen("r3k2r/pPppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPpP/R3K2R b KQkq a3 0 1  ");
+    parse_fen(tricky_position);
     print_board();
     
     moves move_list[2];
