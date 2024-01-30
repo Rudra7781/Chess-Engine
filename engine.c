@@ -11,7 +11,7 @@
 #define U64 unsigned long long
 
 // FEN debug position  after board, who will move, castle, enpassant, halfmove(Draw after 50 fullmove so 100),  fullmove ( how many total move is made)
-#define empty_board "8/8/8/8/8/8/8/8 w - - "
+#define empty_board "8/8/8/8/8/8/8/8 b - - "
 #define start_position "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 "
 #define tricky_position "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQq h4 0 1 "
 #define killer_position "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w Qkq e6 0 1"
@@ -1293,6 +1293,24 @@ void print_move_list(moves *move_list){
     
 }
 
+// COPY MACRO ------------
+// preserve bit board state
+#define copy_board()                                                        \
+    U64 bitboards_copy[12], occupancies_copy[3];                            \
+    int side_copy, enpassant_copy, castle_copy;                             \
+    memcpy(bitboards_copy, bitboards, 96);                                  \
+    memcpy(occupancies_copy, occupancies, 24);                              \
+    side_copy = side, enpassant_copy = enpassant, castle_copy = castle;     \
+
+//  restore bitboard
+#define take_back()                                                         \
+    memcpy(bitboards, bitboards_copy, 96);                                  \
+    memcpy(occupancies, occupancies_copy, 24);                              \
+    side = side_copy, enpassant = enpassant_copy, castle = castle_copy;     \
+//--------------
+
+
+
 // generate all moves
 static inline void generate_moves(moves  *move_list){
     
@@ -1787,6 +1805,7 @@ void init_all(){
 }
 
 
+
 // MAIN ********************************************************************************************************************
 int main(){
     
@@ -1794,16 +1813,18 @@ int main(){
     init_all();
 
     // parse_fen("8/8/8/3B4/8/8/8/8/ b - - ");
-    parse_fen(tricky_position);
+    parse_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQq c6 0 1 ");
     print_board();
     
-    moves move_list[2];
-
-    generate_moves(move_list);
-
-    print_move_list(move_list);
+    copy_board();
 
     
+    parse_fen(empty_board);
+    print_board();
 
+    take_back();
+    print_board();
+
+    printf("%lu", sizeof(occupancies));
     return 0;
 }
